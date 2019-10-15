@@ -6,18 +6,46 @@ let symbols = {};
 let symbolDefs = {};
 let symbolMeta = {};
 
+let Nothing = {
+  symbol: "nothing",
+};
+
+let NothingMeta = {
+  description: "undefined",
+};
+
+function NothingRenderer(props){
+  function changeMe(e){
+    props.updateTree(props.path, getDefault(e.target.value));
+  }
+
+  return (
+    <Card>
+      <Card.Header>{getDescription(Nothing)}</Card.Header>
+      <Card.Body>
+        <select onChange={changeMe} className={"form-control"}>
+          <option value={Nothing.symbol}>Nothing</option>
+          {Object.keys(symbolDefs).filter(symbol => symbolMeta[symbol].name !== undefined).map(symbol => {
+            let meta = symbolMeta[symbol];
+            return <option key={symbol} value={symbol}>{meta.name}</option>
+          })}
+        </select>
+      </Card.Body>
+    </Card>)
+}
+
+registerSymbol(Nothing, NothingMeta, NothingRenderer);
+
+let GreaterThan = {
+  symbol: "gt",
+  lhs: Nothing,
+  rhs: Nothing
+};
+
 let GreaterThanMeta = {
   name: "Greater Than",
   description: "(__lhs__ > __rhs__)",
 };
-
-function GreaterThan(){
-  return {
-    symbol: "gt",
-    lhs: Nothing(),
-    rhs: Nothing()
-  }
-}
 
 function GreaterThanRenderer(props){
   return(
@@ -28,18 +56,18 @@ function GreaterThanRenderer(props){
   )
 }
 
+registerSymbol(GreaterThan, GreaterThanMeta, GreaterThanRenderer);
+
+let Ratio = {
+    symbol: "ratio",
+    lhs: Nothing,
+    rhs: Nothing
+};
+
 let RatioMeta = {
   name: "Ratio",
   description: "(__lhs__:__rhs__)",
 };
-
-function Ratio(){
-  return {
-    symbol: "ratio",
-    lhs: Nothing(),
-    rhs: Nothing()
-  }
-}
 
 function RatioRenderer(props){
   return(
@@ -50,17 +78,17 @@ function RatioRenderer(props){
   )
 }
 
+registerSymbol(Ratio, RatioMeta, RatioRenderer);
+
+let Value = {
+  symbol: "value",
+  value: 0
+};
+
 let ValueMeta = {
   name: "Value",
   description: "__value__"
 };
-
-function Value(){
-  return {
-    symbol: "value",
-    value: 0
-  };
-}
 
 function ValueRenderer(props){
   function handleChange(event){
@@ -74,19 +102,19 @@ function ValueRenderer(props){
   )
 }
 
-let MockDVFMeta = {
-  name: "Total Sales for product in date range",
-  description: "Total Sales for __products__ between __startDate__ and __endDate__",
-};
+registerSymbol(Value, ValueMeta, ValueRenderer);
 
-function MockDVF(){
-  return {
+let MockDVF = {
     symbol: "total_sales_dvf",
     startDate: "19/11/2018",
     endDate: "19/11/2019",
     products: "Bugblaster"
-  };
-}
+};
+
+let MockDVFMeta = {
+  name: "Total Sales for product in date range",
+  description: "Total Sales for __products__ between __startDate__ and __endDate__",
+};
 
 function MockDVFRenderer(props){
   function handleChange(field){
@@ -113,46 +141,16 @@ function MockDVFRenderer(props){
   )
 }
 
-let NothingMeta = {
-  description: "undefined",
-}
+registerSymbol(MockDVF, MockDVFMeta, MockDVFRenderer);
 
-function Nothing() {
-  return {
-    symbol: "nothing",
-  };
-}
-
-function NothingRenderer(props){
-  function changeMe(e){
-    props.updateTree(props.path, getDefault(e.target.value));
-  }
-
-  return (
-    <Card>
-      <Card.Header>{getDescription(Nothing())}</Card.Header>
-      <Card.Body>
-        <select onChange={changeMe} className={"form-control"}>
-          <option value={Nothing().symbol}>Nothing</option>
-          {Object.keys(symbolDefs).filter(symbol => symbolMeta[symbol].name !== undefined).map(symbol => {
-            let meta = symbolMeta[symbol];
-            return <option key={symbol} value={symbol}>{meta.name}</option>
-          })}
-        </select>
-      </Card.Body>
-    </Card>)
-}
+let Root =  {
+  symbol: "root",
+  description: "Condition:",
+  data: Nothing
+};
 
 let RootMeta = {
-    description: "Condition:",
-}
-
-function Root() {
-  return {
-    symbol: "root",
-    description: "Condition:",
-    data: Nothing()
-  }
+  description: "Condition:",
 }
 
 function RootRenderer(props){
@@ -162,11 +160,6 @@ function RootRenderer(props){
   </Card>)
 }
 
-registerSymbol(GreaterThan, GreaterThanMeta, GreaterThanRenderer);
-registerSymbol(Ratio, RatioMeta, RatioRenderer);
-registerSymbol(Nothing, NothingMeta, NothingRenderer);
-registerSymbol(Value, ValueMeta, ValueRenderer);
-registerSymbol(MockDVF, MockDVFMeta, MockDVFRenderer);
 registerSymbol(Root, RootMeta, RootRenderer);
 
 function NodeRenderer(props){
@@ -174,7 +167,7 @@ function NodeRenderer(props){
 }
 
 function getDefault(symbol){
-  return (symbolDefs[symbol] || Nothing)();
+  return symbolDefs[symbol] || Nothing;
 }
 
 function setValue(obj_, path, value){
@@ -191,7 +184,7 @@ function setValue(obj_, path, value){
 }
 
 function registerSymbol(definition, meta, renderer){
-  const symbol = definition().symbol;
+  const symbol = definition.symbol;
   symbols[symbol] = function(node, path, updateTree){return renderer({node: node, path: path, updateTree: updateTree})};
   symbolDefs[symbol] = definition;
   symbolMeta[symbol] = meta;
@@ -238,7 +231,7 @@ function Node(props){
   const [collapsed, updateCollapsed] = useState(false);
 
   function deleteNode(){
-    props.updateTree(props.path, Nothing())
+    props.updateTree(props.path, Nothing)
   }
 
   function togglePanel(){
@@ -252,7 +245,7 @@ function Node(props){
 }
 
 function App() {
-  const initial = Root();
+  const initial = Root;
   const [data, dataUpdater] = useState(initial);
 
   function updateTree(path, value){
