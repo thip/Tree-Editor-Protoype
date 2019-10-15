@@ -23,11 +23,10 @@ function GreaterThan(){
 
 function GreaterThanRenderer(props){
   return(
-    <Card>
-      <Card.Title>{getDescription(props.node)}</Card.Title>
+    <Node path={props.path} title={getDescription(props.node)} updateTree={props.updateTree}>
       <NodeRenderer node={props.node.lhs} path={[...props.path, "lhs"]} updateTree={props.updateTree} />
       <NodeRenderer node={props.node.rhs} path={[...props.path, "rhs"]} updateTree={props.updateTree} />
-    </Card>
+    </Node>
   )
 }
 
@@ -44,11 +43,10 @@ function Ratio(){
 
 function RatioRenderer(props){
   return(
-    <Card>
-      <Card.Title>{getDescription(props.node)}</Card.Title>
+    <Node path={props.path} title={getDescription(props.node)} updateTree={props.updateTree}>
       <NodeRenderer node={props.node.lhs} path={[...props.path, "lhs"]} updateTree={props.updateTree} />
       <NodeRenderer node={props.node.rhs} path={[...props.path, "rhs"]} updateTree={props.updateTree} />
-    </Card>
+    </Node>
   )
 }
 
@@ -56,7 +54,7 @@ function RatioRenderer(props){
 function Value(){
   return {
     symbol: "value",
-    name: "DVF",
+    name: "Value",
     description: "__value__",
     value: 0
   };
@@ -68,9 +66,9 @@ function ValueRenderer(props){
   }
 
   return (
-    <Card>
+    <Node path={props.path} title={"Value"} updateTree={props.updateTree}>
       <input type={"text"} onChange={handleChange} value={props.node.value}/>
-    </Card>
+    </Node>
   )
 }
 
@@ -88,13 +86,16 @@ function NothingRenderer(props){
 
   return (
     <Card>
-      <select onChange={changeMe}>
-        <option value={getDefault().symbol}>Nothing</option>
-        {Object.keys(symbolDefs).filter(k => getDefault(k).name !== undefined).map(k => {
-          let option = getDefault(k);
-          return <option value={option.symbol}>{option.name}</option>
-        })}
-      </select>
+      <Card.Header>???</Card.Header>
+      <Card.Body>
+        <select onChange={changeMe}>
+          <option value={Nothing().symbol}>Nothing</option>
+          {Object.keys(symbolDefs).filter(symbol => getDefault(symbol).name !== undefined).map(k => {
+            let option = getDefault(k);
+            return <option value={option.symbol}>{option.name}</option>
+          })}
+        </select>
+      </Card.Body>
     </Card>)
 }
 
@@ -108,9 +109,8 @@ function Root() {
 
 function RootRenderer(props){
   return (<Card>
-    <Card.Title>{getDescription(props.node)}</Card.Title>
+    <Card.Header>{getDescription(props.node)}</Card.Header>
     <NodeRenderer node={props.node.data} path={[...props.path, "data"]} updateTree={props.updateTree} />
-
   </Card>)
 }
 
@@ -170,8 +170,19 @@ function getDescription(obj){
   return result;
 }
 
+function Node(props){
+  function deleteNode(){
+    props.updateTree(props.path, Nothing())
+  }
+
+  return <Card>
+    <Card.Header>{props.title} <div style={{float: "right", cursor: "pointer"}} onClick={deleteNode}>X</div></Card.Header>
+    <Card.Body>{props.children}</Card.Body>
+  </Card>
+}
+
 function App() {
-  const initial = Root(Nothing());
+  const initial = Root();
   const [data, dataUpdater] = useState(initial);
 
   function updateTree(path, value){
@@ -183,7 +194,9 @@ function App() {
     <div>
       <TreeRenderer data={data} updateTree={updateTree} />
       <Card>
-        <pre>{JSON.stringify(data, null, 2)}</pre>
+        <Card.Body>
+          <pre>{JSON.stringify(data, null, 2)}</pre>
+        </Card.Body>
       </Card>
     </div>
   );
