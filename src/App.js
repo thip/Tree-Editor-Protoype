@@ -9,6 +9,7 @@ registerSymbol(GreaterThan, GreaterThanRenderer);
 registerSymbol(Ratio, RatioRenderer);
 registerSymbol(Nothing, NothingRenderer);
 registerSymbol(Value, ValueRenderer);
+registerSymbol(MockDVF, MockDVFRenderer);
 registerSymbol(Root, RootRenderer);
 
 function GreaterThan(){
@@ -67,7 +68,49 @@ function ValueRenderer(props){
 
   return (
     <Node path={props.path} title={"Value"} updateTree={props.updateTree}>
-      <input type={"text"} onChange={handleChange} value={props.node.value}/>
+      <input type={"text"} className={"form-control"} onChange={handleChange} value={props.node.value}/>
+    </Node>
+  )
+}
+
+function MockDVF(){
+  return {
+    symbol: "total_sales_dvf",
+    name: "Total Sales for product in date range",
+    description: "Total Sales for __products__ between __startDate__ and __endDate__",
+    startDate: "19/11/2018",
+    endDate: "19/11/2019",
+    products: "Bugblaster"
+  };
+}
+
+function MockDVFRenderer(props){
+  function handleStartDateChange(event){
+    props.updateTree([...props.path, "startDate"], event.target.value);
+  }
+
+  function handleEndDateChange(event){
+    props.updateTree([...props.path, "endDate"], event.target.value);
+  }
+
+  function handleProductChange(event){
+    props.updateTree([...props.path, "products"], event.target.value);
+  }
+
+  return (
+    <Node path={props.path} title={getDescription(props.node)} updateTree={props.updateTree}>
+      <form>
+        <div className="form-group">
+          <label>Start Date</label><input type={"text"} className={"form-control"} onChange={handleStartDateChange} value={props.node.startDate}/>
+        </div>
+        <div className="form-group">
+          <label>End Date</label><input type={"text"} className={"form-control"} onChange={handleEndDateChange} value={props.node.endDate}/>
+        </div>
+        <div className="form-group">
+          <label>Products</label><input type={"text"} className={"form-control"} onChange={handleProductChange} value={props.node.products}/>
+        </div>
+      </form>
+
     </Node>
   )
 }
@@ -88,7 +131,7 @@ function NothingRenderer(props){
     <Card>
       <Card.Header>???</Card.Header>
       <Card.Body>
-        <select onChange={changeMe}>
+        <select onChange={changeMe} className={"form-control"}>
           <option value={Nothing().symbol}>Nothing</option>
           {Object.keys(symbolDefs).filter(symbol => getDefault(symbol).name !== undefined).map(k => {
             let option = getDefault(k);
@@ -146,7 +189,7 @@ function TreeRenderer(props){
 }
 
 function getDescription(obj){
-  const elementDescriptor = /__([a-z]+)__/g;
+  const elementDescriptor = /__([a-zA-Z0-9\_]+)__/g;
   const matches = obj.description.matchAll(elementDescriptor);
 
   let match_symbols = [];
