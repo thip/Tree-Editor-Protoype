@@ -118,7 +118,7 @@ function MockDVFRenderer(props){
 function Nothing() {
   return {
     symbol: "nothing",
-    description: "???",
+    description: "undefined",
   };
 }
 
@@ -129,7 +129,7 @@ function NothingRenderer(props){
 
   return (
     <Card>
-      <Card.Header>???</Card.Header>
+      <Card.Header>{getDescription(Nothing())}</Card.Header>
       <Card.Body>
         <select onChange={changeMe} className={"form-control"}>
           <option value={Nothing().symbol}>Nothing</option>
@@ -145,7 +145,7 @@ function NothingRenderer(props){
 function Root() {
   return {
     symbol: "root",
-    description: "Your Tree",
+    description: "Condition:",
     data: Nothing()
   }
 }
