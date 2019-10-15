@@ -214,13 +214,19 @@ function getDescription(obj){
 }
 
 function Node(props){
+  const [collapsed, updateCollapsed] = useState(false);
+
   function deleteNode(){
     props.updateTree(props.path, Nothing())
   }
 
+  function togglePanel(){
+    updateCollapsed(!collapsed);
+  }
+
   return <Card>
-    <Card.Header>{props.title} <div style={{float: "right", cursor: "pointer"}} onClick={deleteNode}>X</div></Card.Header>
-    <Card.Body>{props.children}</Card.Body>
+    <Card.Header onClick={togglePanel}>{props.title} <div style={{float: "right", cursor: "pointer"}} onClick={deleteNode}>X</div></Card.Header>
+    {collapsed ? "" : <Card.Body>{props.children}</Card.Body>}
   </Card>
 }
 
