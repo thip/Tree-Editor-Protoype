@@ -14,7 +14,6 @@ registerSymbol(Root, RootRenderer);
 function GreaterThan(){
   return {
     symbol: "gt",
-    type: "number",
     name: "Greater Than",
     description: "(__lhs__ > __rhs__)",
     lhs: Nothing(),
@@ -36,7 +35,6 @@ function GreaterThanRenderer(props){
 function Ratio(){
   return {
     symbol: "ratio",
-    type: "number",
     name: "Ratio",
     description: "(__lhs__:__rhs__)",
     lhs: Nothing(),
@@ -60,7 +58,6 @@ function Value(){
     symbol: "value",
     name: "DVF",
     description: "__value__",
-    type: "number",
     value: 0
   };
 }
@@ -81,7 +78,6 @@ function Nothing() {
   return {
     symbol: "nothing",
     description: "???",
-    type: "number"
   };
 }
 
@@ -105,7 +101,7 @@ function NothingRenderer(props){
 function Root() {
   return {
     symbol: "root",
-    description: "Your lovely thing",
+    description: "Your Tree",
     data: Nothing()
   }
 }
@@ -114,6 +110,7 @@ function RootRenderer(props){
   return (<Card>
     <Card.Title>{getDescription(props.node)}</Card.Title>
     <NodeRenderer node={props.node.data} path={[...props.path, "data"]} updateTree={props.updateTree} />
+
   </Card>)
 }
 
@@ -185,7 +182,9 @@ function App() {
   return (
     <div>
       <TreeRenderer data={data} updateTree={updateTree} />
-      <button onClick={() => prompt("", JSON.stringify(data))}>Show tree</button>
+      <Card>
+        <pre>{JSON.stringify(data, null, 2)}</pre>
+      </Card>
     </div>
   );
 }
