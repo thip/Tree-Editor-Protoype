@@ -6,25 +6,18 @@ let symbols = {};
 let symbolDefs = {};
 let symbolMeta = {};
 
-let Nothing = {
-  symbol: "nothing",
-};
-
-let NothingMeta = {
-  description: "undefined",
-};
-
 function NothingRenderer(props){
   function changeMe(e){
-    props.updateTree(props.path, getDefault(e.target.value));
+    props.updateTree(props.path, createNode(e.target.value));
   }
 
+  let node = createNode("nothing");
   return (
     <Card>
-      <Card.Header>{getDescription(Nothing)}</Card.Header>
+      <Card.Header>{getDescription(node)}</Card.Header>
       <Card.Body>
         <select onChange={changeMe} className={"form-control"}>
-          <option value={Nothing.symbol}>Nothing</option>
+          <option value={node.symbol}>Nothing</option>
           {Object.keys(symbolDefs).filter(symbol => symbolMeta[symbol].name !== undefined).map(symbol => {
             let meta = symbolMeta[symbol];
             return <option key={symbol} value={symbol}>{meta.name}</option>
@@ -34,18 +27,11 @@ function NothingRenderer(props){
     </Card>)
 }
 
-registerSymbol(Nothing, NothingMeta, NothingRenderer);
-
-let GreaterThan = {
-  symbol: "gt",
-  lhs: Nothing,
-  rhs: Nothing
-};
-
-let GreaterThanMeta = {
-  name: "Greater Than",
-  description: "(__lhs__ > __rhs__)",
-};
+registerSymbol({
+  symbol: "nothing",
+}, {
+  description: "undefined",
+}, NothingRenderer);
 
 function GreaterThanRenderer(props){
   return(
@@ -56,18 +42,14 @@ function GreaterThanRenderer(props){
   )
 }
 
-registerSymbol(GreaterThan, GreaterThanMeta, GreaterThanRenderer);
-
-let Ratio = {
-    symbol: "ratio",
-    lhs: Nothing,
-    rhs: Nothing
-};
-
-let RatioMeta = {
-  name: "Ratio",
-  description: "(__lhs__:__rhs__)",
-};
+registerSymbol({
+  symbol: "gt",
+  lhs: createNode("nothing"),
+  rhs: createNode("nothing")
+}, {
+  name: "Greater Than",
+  description: "(__lhs__ > __rhs__)",
+}, GreaterThanRenderer);
 
 function RatioRenderer(props){
   return(
@@ -78,17 +60,14 @@ function RatioRenderer(props){
   )
 }
 
-registerSymbol(Ratio, RatioMeta, RatioRenderer);
-
-let Value = {
-  symbol: "value",
-  value: 0
-};
-
-let ValueMeta = {
-  name: "Value",
-  description: "__value__"
-};
+registerSymbol({
+  symbol: "ratio",
+  lhs: createNode("nothing"),
+  rhs: createNode("nothing")
+}, {
+  name: "Ratio",
+  description: "(__lhs__:__rhs__)",
+}, RatioRenderer);
 
 function ValueRenderer(props){
   function handleChange(event){
@@ -102,19 +81,13 @@ function ValueRenderer(props){
   )
 }
 
-registerSymbol(Value, ValueMeta, ValueRenderer);
-
-let MockDVF = {
-    symbol: "total_sales_dvf",
-    startDate: "19/11/2018",
-    endDate: "19/11/2019",
-    products: "Bugblaster"
-};
-
-let MockDVFMeta = {
-  name: "Total Sales for product in date range",
-  description: "Total Sales for __products__ between __startDate__ and __endDate__",
-};
+registerSymbol({
+  symbol: "value",
+  value: 0
+}, {
+  name: "Value",
+  description: "__value__"
+}, ValueRenderer);
 
 function MockDVFRenderer(props){
   function handleChange(field){
@@ -141,17 +114,15 @@ function MockDVFRenderer(props){
   )
 }
 
-registerSymbol(MockDVF, MockDVFMeta, MockDVFRenderer);
-
-let Root =  {
-  symbol: "root",
-  description: "Condition:",
-  data: Nothing
-};
-
-let RootMeta = {
-  description: "Condition:",
-}
+registerSymbol({
+  symbol: "total_sales_dvf",
+  startDate: "19/11/2018",
+  endDate: "19/11/2019",
+  products: "Bugblaster"
+}, {
+  name: "Total Sales for product in date range",
+  description: "Total Sales for __products__ between __startDate__ and __endDate__",
+}, MockDVFRenderer);
 
 function RootRenderer(props){
   return (<Card>
@@ -160,14 +131,20 @@ function RootRenderer(props){
   </Card>)
 }
 
-registerSymbol(Root, RootMeta, RootRenderer);
+registerSymbol({
+  symbol: "root",
+  description: "Condition:",
+  data: createNode("nothing")
+}, {
+  description: "Condition:",
+}, RootRenderer);
 
 function NodeRenderer(props){
   return symbols[props.node.symbol](props.node, props.path, props.updateTree);
 }
 
-function getDefault(symbol){
-  return symbolDefs[symbol] || Nothing;
+function createNode(symbol){
+  return symbolDefs[symbol] || symbolDefs["nothing"];
 }
 
 function setValue(obj_, path, value){
@@ -231,7 +208,7 @@ function Node(props){
   const [collapsed, updateCollapsed] = useState(false);
 
   function deleteNode(){
-    props.updateTree(props.path, Nothing)
+    props.updateTree(props.path, createNode("nothing"))
   }
 
   function togglePanel(){
@@ -245,7 +222,7 @@ function Node(props){
 }
 
 function App() {
-  const initial = Root;
+  const initial = createNode("root");
   const [data, dataUpdater] = useState(initial);
 
   function updateTree(path, value){
