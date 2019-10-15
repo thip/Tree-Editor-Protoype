@@ -4,19 +4,16 @@ import {Card} from "react-bootstrap";
 
 let symbols = {};
 let symbolDefs = {};
+let symbolMeta = {};
 
-registerSymbol(GreaterThan, GreaterThanRenderer);
-registerSymbol(Ratio, RatioRenderer);
-registerSymbol(Nothing, NothingRenderer);
-registerSymbol(Value, ValueRenderer);
-registerSymbol(MockDVF, MockDVFRenderer);
-registerSymbol(Root, RootRenderer);
+let GreaterThanMeta = {
+  name: "Greater Than",
+  description: "(__lhs__ > __rhs__)",
+};
 
 function GreaterThan(){
   return {
     symbol: "gt",
-    name: "Greater Than",
-    description: "(__lhs__ > __rhs__)",
     lhs: Nothing(),
     rhs: Nothing()
   }
@@ -31,12 +28,14 @@ function GreaterThanRenderer(props){
   )
 }
 
+let RatioMeta = {
+  name: "Ratio",
+  description: "(__lhs__:__rhs__)",
+};
 
 function Ratio(){
   return {
     symbol: "ratio",
-    name: "Ratio",
-    description: "(__lhs__:__rhs__)",
     lhs: Nothing(),
     rhs: Nothing()
   }
@@ -51,12 +50,14 @@ function RatioRenderer(props){
   )
 }
 
+let ValueMeta = {
+  name: "Value",
+  description: "__value__"
+};
 
 function Value(){
   return {
     symbol: "value",
-    name: "Value",
-    description: "__value__",
     value: 0
   };
 }
@@ -73,11 +74,14 @@ function ValueRenderer(props){
   )
 }
 
+let MockDVFMeta = {
+  name: "Total Sales for product in date range",
+  description: "Total Sales for __products__ between __startDate__ and __endDate__",
+};
+
 function MockDVF(){
   return {
     symbol: "total_sales_dvf",
-    name: "Total Sales for product in date range",
-    description: "Total Sales for __products__ between __startDate__ and __endDate__",
     startDate: "19/11/2018",
     endDate: "19/11/2019",
     products: "Bugblaster"
@@ -85,29 +89,23 @@ function MockDVF(){
 }
 
 function MockDVFRenderer(props){
-  function handleStartDateChange(event){
-    props.updateTree([...props.path, "startDate"], event.target.value);
-  }
-
-  function handleEndDateChange(event){
-    props.updateTree([...props.path, "endDate"], event.target.value);
-  }
-
-  function handleProductChange(event){
-    props.updateTree([...props.path, "products"], event.target.value);
+  function handleChange(field){
+    return function(event){
+      props.updateTree([...props.path, field], event.target.value);
+    }
   }
 
   return (
     <Node path={props.path} title={getDescription(props.node)} updateTree={props.updateTree}>
       <form>
         <div className="form-group">
-          <label>Start Date</label><input type={"text"} className={"form-control"} onChange={handleStartDateChange} value={props.node.startDate}/>
+          <label>Start Date</label><input type={"text"} className={"form-control"} onChange={handleChange("startDate")} value={props.node.startDate}/>
         </div>
         <div className="form-group">
-          <label>End Date</label><input type={"text"} className={"form-control"} onChange={handleEndDateChange} value={props.node.endDate}/>
+          <label>End Date</label><input type={"text"} className={"form-control"} onChange={handleChange("endDate")} value={props.node.endDate}/>
         </div>
         <div className="form-group">
-          <label>Products</label><input type={"text"} className={"form-control"} onChange={handleProductChange} value={props.node.products}/>
+          <label>Products</label><input type={"text"} className={"form-control"} onChange={handleChange("products")} value={props.node.products}/>
         </div>
       </form>
 
@@ -115,10 +113,13 @@ function MockDVFRenderer(props){
   )
 }
 
+let NothingMeta = {
+  description: "undefined",
+}
+
 function Nothing() {
   return {
     symbol: "nothing",
-    description: "undefined",
   };
 }
 
@@ -133,13 +134,17 @@ function NothingRenderer(props){
       <Card.Body>
         <select onChange={changeMe} className={"form-control"}>
           <option value={Nothing().symbol}>Nothing</option>
-          {Object.keys(symbolDefs).filter(symbol => getDefault(symbol).name !== undefined).map(k => {
-            let option = getDefault(k);
-            return <option value={option.symbol}>{option.name}</option>
+          {Object.keys(symbolDefs).filter(symbol => symbolMeta[symbol].name !== undefined).map(symbol => {
+            let meta = symbolMeta[symbol];
+            return <option key={symbol} value={symbol}>{meta.name}</option>
           })}
         </select>
       </Card.Body>
     </Card>)
+}
+
+let RootMeta = {
+    description: "Condition:",
 }
 
 function Root() {
@@ -156,6 +161,13 @@ function RootRenderer(props){
     <NodeRenderer node={props.node.data} path={[...props.path, "data"]} updateTree={props.updateTree} />
   </Card>)
 }
+
+registerSymbol(GreaterThan, GreaterThanMeta, GreaterThanRenderer);
+registerSymbol(Ratio, RatioMeta, RatioRenderer);
+registerSymbol(Nothing, NothingMeta, NothingRenderer);
+registerSymbol(Value, ValueMeta, ValueRenderer);
+registerSymbol(MockDVF, MockDVFMeta, MockDVFRenderer);
+registerSymbol(Root, RootMeta, RootRenderer);
 
 function NodeRenderer(props){
   return symbols[props.node.symbol](props.node, props.path, props.updateTree);
@@ -178,10 +190,11 @@ function setValue(obj_, path, value){
   return obj
 }
 
-function registerSymbol(definition, renderer){
+function registerSymbol(definition, meta, renderer){
   const symbol = definition().symbol;
   symbols[symbol] = function(node, path, updateTree){return renderer({node: node, path: path, updateTree: updateTree})};
   symbolDefs[symbol] = definition;
+  symbolMeta[symbol] = meta;
 }
 
 function TreeRenderer(props){
@@ -189,8 +202,14 @@ function TreeRenderer(props){
 }
 
 function getDescription(obj){
-  const elementDescriptor = /__([a-zA-Z0-9\_]+)__/g;
-  const matches = obj.description.matchAll(elementDescriptor);
+  const elementDescriptor = /__([a-zA-Z0-9_]+)__/g;
+
+  if(symbolMeta[obj.symbol] === undefined){
+    return ""
+  }
+
+  let description = symbolMeta[obj.symbol].description;
+  const matches = description.matchAll(elementDescriptor);
 
   let match_symbols = [];
   let match = matches.next();
@@ -200,11 +219,13 @@ function getDescription(obj){
     match = matches.next();
   }
 
-  let result = obj.description;
+  let result = description;
 
   for (const m of match_symbols) {
-    if (obj[m[1]].description === undefined){
-      result = result.replace(m[0], obj[m[1]].toString());
+    let the_property = obj[m[1]];
+
+    if (the_property.symbol === undefined){
+      result = result.replace(m[0], the_property.toString());
     } else {
       result = result.replace(m[0], getDescription(obj[m[1]]));
     }
