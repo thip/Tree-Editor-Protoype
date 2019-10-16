@@ -171,37 +171,29 @@ function TreeRenderer(props){
   return props.data !== undefined ? symbols[props.data.symbol](props.data, [], props.updateTree) : ""
 }
 
-function getDescription(obj){
+function getDescription(node){
   const elementDescriptor = /__([a-zA-Z0-9_]+)__/g;
 
-  if(symbolMeta[obj.symbol] === undefined){
+  if(symbolMeta[node.symbol] === undefined){
     return ""
   }
 
-  let description = symbolMeta[obj.symbol].description;
-  const matches = description.matchAll(elementDescriptor);
+  let description = symbolMeta[node.symbol].description;
 
-  let match_symbols = [];
-  let match = matches.next();
+  for (const match of symbolMeta[node.symbol].description.matchAll(elementDescriptor)) {
+    let thePropertyName = match[1];
+    let thePropertyToken = match[0];
 
-  while(!match.done){
-    match_symbols.push(match.value);
-    match = matches.next();
-  }
+    let theProperty = node[thePropertyName];
 
-  let result = description;
-
-  for (const m of match_symbols) {
-    let the_property = obj[m[1]];
-
-    if (the_property.symbol === undefined){
-      result = result.replace(m[0], the_property.toString());
+    if (theProperty.symbol === undefined){
+      description = description.replace(thePropertyToken, theProperty.toString());
     } else {
-      result = result.replace(m[0], getDescription(obj[m[1]]));
+      description = description.replace(thePropertyToken, getDescription(theProperty));
     }
   }
 
-  return result;
+  return description;
 }
 
 function Node(props){
