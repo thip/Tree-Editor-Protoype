@@ -44,7 +44,7 @@ function TreeUtils(){
     },
     getSelectableSymbols: function(type){
       return Object.keys(symbolDefs)
-        .filter(symbol => symbolMeta[symbol].name !== undefined && (symbolMeta[symbol].type === type || type == null)).map(symbol => [symbol, symbolMeta[symbol].name])
+        .filter(symbol => symbolMeta[symbol].name !== undefined && (symbolMeta[symbol].type === type || symbolMeta[symbol].type === "*" || type == null)).map(symbol => [symbol, symbolMeta[symbol].name])
     },
     getSymbolMeta: function(symbol){
       return symbolMeta[symbol];
