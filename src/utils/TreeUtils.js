@@ -8,7 +8,7 @@ function TreeUtils(){
   return {
     registerSymbol: function(definition, meta, renderer){
       const symbol = definition.symbol;
-      symbolRenderers[symbol] = function(node, path, updateTree){return renderer({node: node, path: path, updateTree: updateTree})};
+      symbolRenderers[symbol] = function(node, path, updateTree, type){return renderer({node: node, path: path, updateTree: updateTree, type: type})};
       symbolDefs[symbol] = definition;
       symbolMeta[symbol] = meta;
     },
@@ -42,8 +42,12 @@ function TreeUtils(){
     getSymbolRenderer: function(symbol){
       return symbolRenderers[symbol]
     },
-    getSelectableSymbols: function(){
-      return Object.keys(symbolDefs).filter(symbol => symbolMeta[symbol].name !== undefined).map(symbol => [symbol, symbolMeta[symbol].name])
+    getSelectableSymbols: function(type){
+      return Object.keys(symbolDefs)
+        .filter(symbol => symbolMeta[symbol].name !== undefined && (symbolMeta[symbol].type === type || type == null)).map(symbol => [symbol, symbolMeta[symbol].name])
+    },
+    getSymbolMeta: function(symbol){
+      return symbolMeta[symbol];
     },
     setValue: function(obj_, path, value){
       let [element, ...rest] = path;

@@ -38,5 +38,6 @@ export function registerMockDvf(TreeUtils) {
   }, {
     name: "Total Sales for product in date range",
     description: "Total Sales for __products__ between __startDate__ and __endDate__",
+    type: "number",
   }, MockDVFRenderer);
 }

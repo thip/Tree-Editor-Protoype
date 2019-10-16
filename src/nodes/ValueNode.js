@@ -19,6 +19,7 @@ export function registerValueNode(TreeUtils) {
     value: 0
   }, {
     name: "Value",
-    description: "__value__"
+    description: "__value__",
+    type: "number",
   }, ValueRenderer);
 }
