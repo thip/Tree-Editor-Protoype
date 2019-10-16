@@ -9,7 +9,7 @@ export function registerNothingNode(TreeUtils, type) {
 
     let node = TreeUtils.createNode("nothing");
     return (
-      <Card>
+      <Card bg={"warning"}>
         <Card.Header>{TreeUtils.getDescription(node)}</Card.Header>
         <Card.Body>
           <select onChange={changeMe} className={"form-control"}>

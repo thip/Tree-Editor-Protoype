@@ -5,6 +5,7 @@ import {registerValueNode} from "./ValueNode";
 import {registerMockDvf} from "./MockDvfNode";
 import {registerRootNode} from "./Root";
 import {registerNamedNode} from "./NamedNode";
+import {registerTextInput} from "./TextInput";
 
 export function registerAllNodes(TreeUtils) {
   registerNothingNode(TreeUtils);
@@ -14,6 +15,7 @@ export function registerAllNodes(TreeUtils) {
   registerMockDvf(TreeUtils);
   registerRootNode(TreeUtils);
   registerNamedNode(TreeUtils);
+  registerTextInput(TreeUtils);
 
   return TreeUtils;
 }

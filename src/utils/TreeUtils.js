@@ -1,4 +1,7 @@
 import {registerAllNodes} from "../nodes/RegisterNodes";
+import {Node} from "../nodes/Node";
+import {NodeRenderer} from "../nodes/NodeRenderer";
+import React from "react";
 
 function TreeUtils(){
   let symbolRenderers = {};
@@ -60,6 +63,20 @@ function TreeUtils(){
 
       obj[element] = this.setValue(obj[element], rest, value);
       return obj
+    },
+    GenericRenderer: function (props) {
+      let description = this.getDescription(props.node);
+      let propertyTypes = this.getSymbolMeta(props.node.symbol).propertyTypes;
+
+      return (
+        <Node path={props.path} title={description} updateTree={props.updateTree}>
+          {Object.keys(propertyTypes).map(propertyName => {
+            let propertyType = propertyTypes[propertyName] === "*" ? props.type : propertyTypes[propertyName];
+
+            return <NodeRenderer node={props.node[propertyName]} path={[...props.path, propertyName]} updateTree={props.updateTree} type={propertyType}/>
+          })}
+        </Node>
+      )
     }
   };
 }
